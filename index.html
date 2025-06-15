@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Penjualan</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- jsPDF for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
-    <!-- SheetJS (xlsx) for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -44,10 +40,8 @@
 </head>
 <body class="bg-gray-100">
 
-    <!-- Main Container -->
     <div id="app" class="flex h-screen bg-gray-200">
 
-        <!-- Login Page -->
         <div id="login-page" class="w-full h-full flex items-center justify-center bg-gray-800">
             <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
                 <h2 class="text-3xl font-bold text-center text-gray-800">Selamat Datang</h2>
@@ -72,8 +66,7 @@
             </div>
         </div>
 
-         <!-- Register Page -->
-        <div id="register-page" class="w-full h-full flex items-center justify-center bg-gray-800 hidden">
+         <div id="register-page" class="w-full h-full flex items-center justify-center bg-gray-800 hidden">
             <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
                 <h2 class="text-3xl font-bold text-center text-gray-800">Buat Akun Baru</h2>
                 <form id="register-form" class="space-y-6">
@@ -96,9 +89,7 @@
             </div>
         </div>
 
-        <!-- Main Application -->
         <div id="main-app" class="hidden w-full h-full">
-            <!-- Sidebar -->
             <div id="sidebar" class="flex flex-col w-64 bg-white shadow-lg">
                 <div class="flex items-center justify-center h-20 border-b">
                     <h1 class="text-2xl font-bold text-blue-600">SalesApp</h1>
@@ -126,14 +117,11 @@
                 </div>
             </div>
 
-            <!-- Content Area -->
             <div class="flex-1 flex flex-col overflow-hidden">
                 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                    <!-- Page: Sales Form -->
                     <div id="page-form" class="hidden">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-6">Form Input Penjualan</h2>
                         <form id="sales-form" class="bg-white p-8 rounded-lg shadow-md">
-                           <!-- Form fields will be here -->
                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-gray-700">ID Penjualan</label>
@@ -166,15 +154,13 @@
                                 </div>
                            </div>
 
-                           <!-- Dynamic Product List -->
                            <div class="mt-8 border-t pt-6">
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-xl font-semibold text-gray-700">Detail Produk</h3>
                                     <button type="button" id="add-product-btn" class="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600"><i class="fas fa-plus mr-2"></i>Tambah Produk</button>
                                 </div>
                                 <div id="product-list" class="space-y-4">
-                                    <!-- Product items will be injected here by JS -->
-                                </div>
+                                    </div>
                            </div>
 
                            <div class="mt-8 border-t pt-6 text-right">
@@ -187,11 +173,9 @@
                         </form>
                     </div>
 
-                    <!-- Page: Dashboard -->
                     <div id="page-dashboard" class="hidden">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-6">Dasbor Performa & Data Penjualan</h2>
                         
-                        <!-- Stats Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                            <div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
                                <div>
@@ -231,7 +215,6 @@
                            </div>
                         </div>
 
-                        <!-- Sales Table & Actions -->
                         <div class="bg-white p-6 rounded-lg shadow">
                             <div class="flex justify-between items-center mb-4">
                                <h3 class="text-xl font-semibold">Semua Data Penjualan</h3>
@@ -253,14 +236,12 @@
                                         </tr>
                                     </thead>
                                     <tbody id="sales-table-body">
-                                        <!-- Data rows will be injected here by JS -->
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Page: User Management -->
                     <div id="page-users" class="hidden">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-6">Manajemen Pengguna</h2>
                         <div class="bg-white p-6 rounded-lg shadow">
@@ -275,8 +256,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="users-table-body">
-                                        <!-- User rows will be injected here by JS -->
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
                         </div>
@@ -285,7 +265,6 @@
             </div>
         </div>
 
-        <!-- Modal for Edit/View Sales -->
         <div id="sales-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
             <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-3/4 lg:w-1/2 max-h-screen overflow-y-auto no-scrollbar">
                 <div class="p-6">
@@ -297,20 +276,17 @@
                         </div>
                     </div>
                     <div id="modal-content" class="mt-4">
-                        <!-- Content will be injected by JS -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
         
-        <!-- Loading Spinner -->
         <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
             <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
         </div>
 
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -319,15 +295,14 @@
         import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         // IMPORTANT: Replace with your Firebase project's configuration
-        const firebaseConfig = {
-    apiKey: "AIzaSyB3tTddbg09dEoW1RVVPxG5OrhAScj0x6M",
-    authDomain: "sales-6fbe3.firebaseapp.com",
-    projectId: "sales-6fbe3",
-    storageBucket: "sales-6fbe3.firebasestorage.app",
-    messagingSenderId: "829636684860",
-    appId: "1:829636684860:web:3302dea7d7fe548d742739"
-  };
-
+       const firebaseConfig = {
+  apiKey: "AIzaSyB3tTddbg09dEoW1RVVPxG5OrhAScj0x6M",
+  authDomain: "sales-6fbe3.firebaseapp.com",
+  projectId: "sales-6fbe3",
+  storageBucket: "sales-6fbe3.firebasestorage.app",
+  messagingSenderId: "829636684860",
+  appId: "1:829636684860:web:3302dea7d7fe548d742739"
+};
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -523,9 +498,9 @@
         productList.addEventListener('input', e => {
             if (e.target.classList.contains('product-qty') || e.target.classList.contains('product-price')) {
                 const item = e.target.closest('.grid');
-                const qty = item.querySelector('.product-qty').value || 0;
-                const price = item.querySelector('.product-price').value || 0;
-                const total = parseFloat(qty) * parseFloat(price);
+                const qty = parseFloat(item.querySelector('.product-qty').value) || 0;
+                const price = parseFloat(item.querySelector('.product-price').value) || 0;
+                const total = qty * price;
                 item.querySelector('.product-total').value = `Rp ${total.toLocaleString('id-ID')}`;
                 updateGrandTotal();
             }
@@ -539,9 +514,9 @@
         function updateGrandTotal() {
             let grandTotal = 0;
             document.querySelectorAll('#product-list .grid').forEach(item => {
-                const qty = item.querySelector('.product-qty').value || 0;
-                const price = item.querySelector('.product-price').value || 0;
-                grandTotal += parseFloat(qty) * parseFloat(price);
+                const qty = parseFloat(item.querySelector('.product-qty').value) || 0;
+                const price = parseFloat(item.querySelector('.product-price').value) || 0;
+                grandTotal += qty * price;
             });
             document.getElementById('grand-total').textContent = formatCurrency(grandTotal);
         }
@@ -588,26 +563,32 @@
 
             const idPenjualan = document.getElementById('id_penjualan').value;
             const parts = idPenjualan.split('/');
-            const sequence = parseInt(parts[1]);
-            const month = parseInt(parts[2]);
-            const year = parseInt(parts[3]);
+            const sequence = parseInt(parts[1]) || 0;
+            const month = parseInt(parts[2]) || 0;
+            const year = parseInt(parts[3]) || 0;
 
             const products = [];
             let grandTotal = 0;
             document.querySelectorAll('#product-list .grid').forEach(item => {
-                const qty = parseFloat(item.querySelector('.product-qty').value);
-                const price = parseFloat(item.querySelector('.product-price').value);
-                products.push({
-                    name: item.querySelector('.product-name').value,
-                    qty: qty,
-                    price: price,
-                    total: qty * price
-                });
-                grandTotal += qty * price;
+                const name = item.querySelector('.product-name').value.trim();
+                const qty = parseFloat(item.querySelector('.product-qty').value) || 0;
+                const price = parseFloat(item.querySelector('.product-price').value) || 0;
+
+                // Only add product if it has a name and quantity/price
+                if (name && (qty > 0 || price > 0)) {
+                    const total = qty * price;
+                    products.push({
+                        name: name,
+                        qty: qty,
+                        price: price,
+                        total: total
+                    });
+                    grandTotal += total;
+                }
             });
 
             if (products.length === 0) {
-                alert('Harap tambahkan minimal satu produk.');
+                alert('Harap tambahkan minimal satu produk yang valid (nama, qty, dan harga harus diisi).');
                 loadingSpinner.classList.add('hidden');
                 return;
             }
@@ -1030,76 +1011,5 @@
         
     </script>
 
-    <!-- 
-    ==================================================================
-    PENTING: CLOUD FUNCTION UNTUK NOTIFIKASI EMAIL
-    ==================================================================
-    Kode di bawah ini BUKAN untuk dijalankan di browser.
-    Anda harus men-deploy ini ke Firebase Cloud Functions.
-    
-    Langkah-langkah:
-    1. Setup Firebase CLI di komputer Anda.
-    2. Jalankan `firebase init functions`.
-    3. Pilih project Firebase Anda.
-    4. Pilih JavaScript atau TypeScript.
-    5. Ganti file `index.js` (atau `index.ts`) di folder `functions` dengan kode di bawah ini.
-    6. Install dependency: `npm install nodemailer`
-    7. Konfigurasi email & password Anda di environment variables functions:
-       firebase functions:config:set gmail.email="EMAIL_PENGIRIM@gmail.com" gmail.password="APP_PASSWORD_GMAIL_ANDA"
-       CATATAN: Gunakan "App Password" dari akun Google Anda, bukan password biasa.
-    8. Deploy dengan `firebase deploy --only functions`.
-    
-    -------------------- KODE UNTUK functions/index.js --------------------
-    
-    const functions = require("firebase-functions");
-    const nodemailer = require("nodemailer");
-
-    const gmailEmail = functions.config().gmail.email;
-    const gmailPassword = functions.config().gmail.password;
-
-    const mailTransport = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: gmailEmail,
-            pass: gmailPassword,
-        },
-    });
-
-    exports.sendSaleNotification = functions.https.onCall(async (data, context) => {
-        const saleData = data.saleData;
-
-        const mailOptions = {
-            from: `"Sales App Notifier" <${gmailEmail}>`,
-            to: "umaroud88@gmail.com",
-            subject: `Penjualan Baru: ${saleData.idPenjualan}`,
-            html: `
-                <h1>Ada Penjualan Baru!</h1>
-                <p>Detail Penjualan:</p>
-                <ul>
-                    <li><strong>ID Penjualan:</strong> ${saleData.idPenjualan}</li>
-                    <li><strong>Nama Pelanggan:</strong> ${saleData.namaPelanggan}</li>
-                    <li><strong>Nama Sales:</strong> ${saleData.namaSales}</li>
-                    <li><strong>Total Pembelian:</strong> Rp ${saleData.grandTotal.toLocaleString('id-ID')}</li>
-                </ul>
-                <p>Silakan cek dasbor untuk detail lebih lengkap.</p>
-            `,
-        };
-
-        try {
-            await mailTransport.sendMail(mailOptions);
-            functions.logger.log("Notifikasi email terkirim untuk penjualan:", saleData.idPenjualan);
-            return { success: true };
-        } catch (error) {
-            functions.logger.error(
-                "Gagal mengirim email:",
-                error
-            );
-            throw new functions.https.HttpsError('internal', 'Gagal mengirim email notifikasi.', error);
-        }
-    });
-
-    -------------------- AKHIR DARI KODE CLOUD FUNCTION --------------------
-    -->
-
-</body>
+    </body>
 </html>
