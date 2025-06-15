@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Penjualan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- SheetJS (xlsx) for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Custom styles for better UX */
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+        }
+        .nav-link:hover:not(.active) {
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Main Container -->
+    <div id="app" class="flex h-screen bg-gray-200">
+
+        <!-- Login Page -->
+        <div id="login-page" class="w-full h-full flex items-center justify-center bg-gray-800">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-center text-gray-800">Selamat Datang</h2>
+                <p class="text-center text-gray-600">Silakan login untuk melanjutkan</p>
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="text-sm font-semibold text-gray-700 block">Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 mt-2 text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com" required>
+                    </div>
+                    <div>
+                        <label for="password" class="text-sm font-semibold text-gray-700 block">Password</label>
+                        <input type="password" id="password" name="password" class="w-full px-4 py-2 mt-2 text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" required>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Login</button>
+                    </div>
+                </form>
+                <div id="login-error" class="text-sm text-center text-red-500"></div>
+                <p class="text-xs text-center text-gray-500">
+                    Belum punya akun? <a href="#" id="show-register" class="text-blue-600 hover:underline">Daftar di sini</a>.
+                </p>
+            </div>
+        </div>
+
+         <!-- Register Page -->
+        <div id="register-page" class="w-full h-full flex items-center justify-center bg-gray-800 hidden">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+                <h2 class="text-3xl font-bold text-center text-gray-800">Buat Akun Baru</h2>
+                <form id="register-form" class="space-y-6">
+                    <div>
+                        <label for="register-email" class="text-sm font-semibold text-gray-700 block">Email</label>
+                        <input type="email" id="register-email" class="w-full px-4 py-2 mt-2 text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="nama@email.com" required>
+                    </div>
+                    <div>
+                        <label for="register-password" class="text-sm font-semibold text-gray-700 block">Password</label>
+                        <input type="password" id="register-password" class="w-full px-4 py-2 mt-2 text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Minimal 6 karakter" required>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Daftar</button>
+                    </div>
+                </form>
+                <div id="register-error" class="text-sm text-center text-red-500"></div>
+                <p class="text-xs text-center text-gray-500">
+                    Sudah punya akun? <a href="#" id="show-login" class="text-blue-600 hover:underline">Login di sini</a>.
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="main-app" class="hidden w-full h-full">
+            <!-- Sidebar -->
+            <div id="sidebar" class="flex flex-col w-64 bg-white shadow-lg">
+                <div class="flex items-center justify-center h-20 border-b">
+                    <h1 class="text-2xl font-bold text-blue-600">SalesApp</h1>
+                </div>
+                <nav class="flex-grow px-4 py-4">
+                    <a href="#" id="nav-form" class="nav-link flex items-center p-3 my-2 rounded-lg">
+                        <i class="fas fa-edit w-6 text-center"></i><span class="ml-4">Form Penjualan</span>
+                    </a>
+                    <a href="#" id="nav-dashboard" class="nav-link admin-only flex items-center p-3 my-2 rounded-lg">
+                        <i class="fas fa-chart-line w-6 text-center"></i><span class="ml-4">Dasbor & CRUD</span>
+                    </a>
+                    <a href="#" id="nav-users" class="nav-link admin-only flex items-center p-3 my-2 rounded-lg">
+                        <i class="fas fa-users-cog w-6 text-center"></i><span class="ml-4">Manajemen User</span>
+                    </a>
+                </nav>
+                <div class="px-4 py-4 border-t">
+                    <div id="user-profile" class="flex items-center">
+                        <i class="fas fa-user-circle text-2xl text-gray-500"></i>
+                        <div class="ml-3">
+                            <p id="user-email" class="text-sm font-semibold text-gray-700"></p>
+                            <p id="user-role" class="text-xs text-gray-500"></p>
+                        </div>
+                    </div>
+                    <button id="logout-button" class="w-full mt-4 px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600">Logout</button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                    <!-- Page: Sales Form -->
+                    <div id="page-form" class="hidden">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Form Input Penjualan</h2>
+                        <form id="sales-form" class="bg-white p-8 rounded-lg shadow-md">
+                           <!-- Form fields will be here -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700">ID Penjualan</label>
+                                    <input type="text" id="id_penjualan" class="w-full mt-1 p-2 bg-gray-200 border rounded" readonly>
+                                    <small class="text-gray-500">ID akan dibuat secara otomatis.</small>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700">Nama Sales</label>
+                                    <input type="text" id="nama_sales" class="w-full mt-1 p-2 border rounded" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700">Nama Pelanggan</label>
+                                    <input type="text" id="nama_pelanggan" class="w-full mt-1 p-2 border rounded" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700">Nomor Telepon Pelanggan</label>
+                                    <input type="tel" id="telepon_pelanggan" class="w-full mt-1 p-2 border rounded" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-gray-700">Alamat Pelanggan</label>
+                                    <textarea id="alamat_pelanggan" rows="2" class="w-full mt-1 p-2 border rounded" required></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700">Tanggal Pembelian</label>
+                                    <input type="date" id="tanggal_pembelian" class="w-full mt-1 p-2 border rounded" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700">Estimasi Tanggal Pengiriman</label>
+                                    <input type="date" id="tanggal_pengiriman" class="w-full mt-1 p-2 border rounded" required>
+                                </div>
+                           </div>
+
+                           <!-- Dynamic Product List -->
+                           <div class="mt-8 border-t pt-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-semibold text-gray-700">Detail Produk</h3>
+                                    <button type="button" id="add-product-btn" class="px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600"><i class="fas fa-plus mr-2"></i>Tambah Produk</button>
+                                </div>
+                                <div id="product-list" class="space-y-4">
+                                    <!-- Product items will be injected here by JS -->
+                                </div>
+                           </div>
+
+                           <div class="mt-8 border-t pt-6 text-right">
+                                <h3 class="text-2xl font-bold">Total Keseluruhan: <span id="grand-total">Rp 0</span></h3>
+                           </div>
+                           
+                           <div class="mt-8 text-right">
+                               <button type="submit" class="px-8 py-3 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Simpan Penjualan</button>
+                           </div>
+                        </form>
+                    </div>
+
+                    <!-- Page: Dashboard -->
+                    <div id="page-dashboard" class="hidden">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Dasbor Performa & Data Penjualan</h2>
+                        
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                           <div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+                               <div>
+                                   <p class="text-sm font-medium text-gray-500">Total Penjualan</p>
+                                   <p id="stat-total-penjualan" class="text-3xl font-bold text-gray-800">Rp 0</p>
+                               </div>
+                               <div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full">
+                                   <i class="fas fa-dollar-sign text-2xl text-blue-500"></i>
+                               </div>
+                           </div>
+                           <div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+                               <div>
+                                   <p class="text-sm font-medium text-gray-500">Jumlah Transaksi</p>
+                                   <p id="stat-jumlah-transaksi" class="text-3xl font-bold text-gray-800">0</p>
+                               </div>
+                               <div class="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full">
+                                   <i class="fas fa-receipt text-2xl text-green-500"></i>
+                               </div>
+                           </div>
+                           <div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+                               <div>
+                                   <p class="text-sm font-medium text-gray-500">Produk Terjual</p>
+                                   <p id="stat-produk-terjual" class="text-3xl font-bold text-gray-800">0</p>
+                               </div>
+                               <div class="w-12 h-12 flex items-center justify-center bg-yellow-100 rounded-full">
+                                   <i class="fas fa-box-open text-2xl text-yellow-500"></i>
+                               </div>
+                           </div>
+                           <div class="bg-white p-6 rounded-lg shadow flex items-center justify-between">
+                               <div>
+                                   <p class="text-sm font-medium text-gray-500">Jumlah Pelanggan</p>
+                                   <p id="stat-jumlah-pelanggan" class="text-3xl font-bold text-gray-800">0</p>
+                               </div>
+                               <div class="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-full">
+                                   <i class="fas fa-users text-2xl text-purple-500"></i>
+                               </div>
+                           </div>
+                        </div>
+
+                        <!-- Sales Table & Actions -->
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center mb-4">
+                               <h3 class="text-xl font-semibold">Semua Data Penjualan</h3>
+                               <div class="space-x-2">
+                                   <button id="export-excel-btn" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700"><i class="fas fa-file-excel mr-2"></i>Ekspor Excel</button>
+                                   <button id="export-pdf-btn" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700"><i class="fas fa-file-pdf mr-2"></i>Ekspor PDF</button>
+                               </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-500">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">ID Penjualan</th>
+                                            <th scope="col" class="px-6 py-3">Pelanggan</th>
+                                            <th scope="col" class="px-6 py-3">Tanggal</th>
+                                            <th scope="col" class="px-6 py-3">Sales</th>
+                                            <th scope="col" class="px-6 py-3">Total Harga</th>
+                                            <th scope="col" class="px-6 py-3">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sales-table-body">
+                                        <!-- Data rows will be injected here by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page: User Management -->
+                    <div id="page-users" class="hidden">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Manajemen Pengguna</h2>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-500">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">Email</th>
+                                            <th scope="col" class="px-6 py-3">User ID</th>
+                                            <th scope="col" class="px-6 py-3">Peran Saat Ini</th>
+                                            <th scope="col" class="px-6 py-3">Ubah Peran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                        <!-- User rows will be injected here by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Modal for Edit/View Sales -->
+        <div id="sales-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-3/4 lg:w-1/2 max-h-screen overflow-y-auto no-scrollbar">
+                <div class="p-6">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-2xl font-semibold">Detail Penjualan</h3>
+                        <div class="space-x-2">
+                             <button id="print-invoice-modal-btn" class="px-4 py-2 text-sm bg-teal-500 text-white rounded hover:bg-teal-600"><i class="fas fa-print mr-2"></i>Cetak Invoice</button>
+                             <button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                        </div>
+                    </div>
+                    <div id="modal-content" class="mt-4">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+            <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, onSnapshot, query, where, getDocs, deleteDoc, updateDoc, serverTimestamp, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+
+        // IMPORTANT: Replace with your Firebase project's configuration
+        const firebaseConfig = {
+    apiKey: "AIzaSyB3tTddbg09dEoW1RVVPxG5OrhAScj0x6M",
+    authDomain: "sales-6fbe3.firebaseapp.com",
+    projectId: "sales-6fbe3",
+    storageBucket: "sales-6fbe3.firebasestorage.app",
+    messagingSenderId: "829636684860",
+    appId: "1:829636684860:web:3302dea7d7fe548d742739"
+  };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const functions = getFunctions(app);
+
+        // --- DOM Elements ---
+        const loginPage = document.getElementById('login-page');
+        const registerPage = document.getElementById('register-page');
+        const mainApp = document.getElementById('main-app');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        let currentUserRole = null;
+        let salesUnsubscribe = null;
+        let usersUnsubscribe = null;
+        let currentOpenSaleId = null;
+
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                loadingSpinner.classList.remove('hidden');
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    currentUserRole = userDoc.data().role;
+                    document.getElementById('user-email').textContent = user.email;
+                    document.getElementById('user-role').textContent = `Peran: ${currentUserRole}`;
+                    setupUIForRole(currentUserRole);
+                    navigateTo('form');
+                } else {
+                    // This is a new user, create their document with a default role
+                    await setDoc(userDocRef, { email: user.email, role: 'user' });
+                    currentUserRole = 'user';
+                    document.getElementById('user-email').textContent = user.email;
+                    document.getElementById('user-role').textContent = 'Peran: user';
+                    setupUIForRole('user');
+                    navigateTo('form');
+                }
+                
+                loginPage.classList.add('hidden');
+                registerPage.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.classList.add('flex');
+
+                attachListeners(); // Attach Firestore listeners after login
+                loadingSpinner.classList.add('hidden');
+
+            } else {
+                // User is signed out.
+                currentUserRole = null;
+                mainApp.classList.add('hidden');
+                mainApp.classList.remove('flex');
+                loginPage.classList.remove('hidden');
+                
+                // Detach listeners on logout
+                if (salesUnsubscribe) salesUnsubscribe();
+                if (usersUnsubscribe) usersUnsubscribe();
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(err => {
+                    document.getElementById('login-error').textContent = `Error: ${err.message}`;
+                });
+        });
+
+        document.getElementById('register-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const registerError = document.getElementById('register-error');
+            
+            registerError.textContent = '';
+            
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    // User created, onAuthStateChanged will handle the rest
+                })
+                .catch(error => {
+                    registerError.textContent = `Gagal mendaftar: ${error.message}`;
+                });
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            signOut(auth);
+        });
+        
+        document.getElementById('show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginPage.classList.add('hidden');
+            registerPage.classList.remove('hidden');
+        });
+
+        document.getElementById('show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            registerPage.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+        });
+
+
+        // --- UI & NAVIGATION ---
+        function setupUIForRole(role) {
+            const adminElements = document.querySelectorAll('.admin-only');
+            if (role === 'admin') {
+                adminElements.forEach(el => el.style.display = 'flex');
+            } else {
+                adminElements.forEach(el => el.style.display = 'none');
+            }
+        }
+        
+        const pages = {
+            form: document.getElementById('page-form'),
+            dashboard: document.getElementById('page-dashboard'),
+            users: document.getElementById('page-users')
+        };
+        const navLinks = {
+            form: document.getElementById('nav-form'),
+            dashboard: document.getElementById('nav-dashboard'),
+            users: document.getElementById('nav-users')
+        };
+        
+        function navigateTo(pageKey) {
+            Object.values(pages).forEach(page => page.classList.add('hidden'));
+            Object.values(navLinks).forEach(link => link.classList.remove('active'));
+
+            if (pages[pageKey]) {
+                pages[pageKey].classList.remove('hidden');
+            }
+             if (navLinks[pageKey]) {
+                navLinks[pageKey].classList.add('active');
+            }
+
+            if (pageKey === 'form') {
+                 generateSalesID();
+            }
+        }
+        
+        document.getElementById('nav-form').addEventListener('click', () => navigateTo('form'));
+        document.getElementById('nav-dashboard').addEventListener('click', () => navigateTo('dashboard'));
+        document.getElementById('nav-users').addEventListener('click', () => navigateTo('users'));
+
+        // --- SALES FORM LOGIC ---
+        const productList = document.getElementById('product-list');
+        const addProductBtn = document.getElementById('add-product-btn');
+        let productCount = 0;
+
+        function addProductItem() {
+            if (productCount >= 5) {
+                alert("Maksimal 5 produk per transaksi.");
+                return;
+            }
+            productCount++;
+            const productItem = document.createElement('div');
+            productItem.className = 'grid grid-cols-1 md:grid-cols-12 gap-2 items-center border p-2 rounded';
+            productItem.innerHTML = `
+                <div class="md:col-span-4">
+                    <label class="text-xs">Nama Produk</label>
+                    <input type="text" class="product-name w-full p-1 border rounded" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-xs">Qty</label>
+                    <input type="number" class="product-qty w-full p-1 border rounded" value="1" min="1" required>
+                </div>
+                <div class="md:col-span-3">
+                    <label class="text-xs">Harga Produk</label>
+                    <input type="number" class="product-price w-full p-1 border rounded" value="0" min="0" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-xs">Total</label>
+                    <input type="text" class="product-total w-full p-1 bg-gray-200 border rounded" readonly>
+                </div>
+                <div class="text-right">
+                    <button type="button" class="remove-product-btn text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            productList.appendChild(productItem);
+        }
+
+        productList.addEventListener('click', e => {
+            if (e.target.closest('.remove-product-btn')) {
+                e.target.closest('.grid').remove();
+                productCount--;
+                updateGrandTotal();
+            }
+        });
+        
+        productList.addEventListener('input', e => {
+            if (e.target.classList.contains('product-qty') || e.target.classList.contains('product-price')) {
+                const item = e.target.closest('.grid');
+                const qty = item.querySelector('.product-qty').value || 0;
+                const price = item.querySelector('.product-price').value || 0;
+                const total = parseFloat(qty) * parseFloat(price);
+                item.querySelector('.product-total').value = `Rp ${total.toLocaleString('id-ID')}`;
+                updateGrandTotal();
+            }
+        });
+        
+        function formatCurrency(value) {
+            if (typeof value !== 'number') return 'Rp 0';
+            return `Rp ${value.toLocaleString('id-ID')}`;
+        }
+
+        function updateGrandTotal() {
+            let grandTotal = 0;
+            document.querySelectorAll('#product-list .grid').forEach(item => {
+                const qty = item.querySelector('.product-qty').value || 0;
+                const price = item.querySelector('.product-price').value || 0;
+                grandTotal += parseFloat(qty) * parseFloat(price);
+            });
+            document.getElementById('grand-total').textContent = formatCurrency(grandTotal);
+        }
+        
+        addProductBtn.addEventListener('click', addProductItem);
+
+        // Auto-generate Sales ID
+        async function generateSalesID() {
+            const now = new Date();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear();
+            const prefix = `UO/`;
+            const suffix = `/${month}/${year}/RA`;
+            
+            const salesRef = collection(db, "sales");
+            const q = query(salesRef, 
+                where("year", "==", year), 
+                where("month", "==", parseInt(month)), 
+                orderBy("sequence", "desc"), 
+                limit(1));
+
+            const querySnapshot = await getDocs(q);
+            let nextSequence = 1;
+            if (!querySnapshot.empty) {
+                const lastSale = querySnapshot.docs[0].data();
+                nextSequence = lastSale.sequence + 1;
+            }
+            
+            const sequencePadded = nextSequence.toString().padStart(3, '0');
+            document.getElementById('id_penjualan').value = `${prefix}${sequencePadded}${suffix}`;
+            
+            document.getElementById('tanggal_pembelian').valueAsDate = now;
+            const deliveryDate = new Date();
+            deliveryDate.setDate(now.getDate() + 3);
+            document.getElementById('tanggal_pengiriman').valueAsDate = deliveryDate;
+        }
+
+
+        // --- FIRESTORE & DATA HANDLING ---
+
+        document.getElementById('sales-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loadingSpinner.classList.remove('hidden');
+
+            const idPenjualan = document.getElementById('id_penjualan').value;
+            const parts = idPenjualan.split('/');
+            const sequence = parseInt(parts[1]);
+            const month = parseInt(parts[2]);
+            const year = parseInt(parts[3]);
+
+            const products = [];
+            let grandTotal = 0;
+            document.querySelectorAll('#product-list .grid').forEach(item => {
+                const qty = parseFloat(item.querySelector('.product-qty').value);
+                const price = parseFloat(item.querySelector('.product-price').value);
+                products.push({
+                    name: item.querySelector('.product-name').value,
+                    qty: qty,
+                    price: price,
+                    total: qty * price
+                });
+                grandTotal += qty * price;
+            });
+
+            if (products.length === 0) {
+                alert('Harap tambahkan minimal satu produk.');
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            const salesData = {
+                idPenjualan,
+                sequence,
+                year,
+                month,
+                namaPelanggan: document.getElementById('nama_pelanggan').value,
+                alamatPelanggan: document.getElementById('alamat_pelanggan').value,
+                teleponPelanggan: document.getElementById('telepon_pelanggan').value,
+                tanggalPembelian: document.getElementById('tanggal_pembelian').value,
+                tanggalPengiriman: document.getElementById('tanggal_pengiriman').value,
+                namaSales: document.getElementById('nama_sales').value,
+                products: products,
+                grandTotal: grandTotal,
+                createdBy: auth.currentUser.uid,
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, "sales"), salesData);
+                
+                const sendSaleNotification = httpsCallable(functions, 'sendSaleNotification');
+                await sendSaleNotification({ 
+                    saleId: docRef.id, 
+                    saleData: salesData 
+                });
+
+                alert('Data penjualan berhasil disimpan dan notifikasi email telah dikirim!');
+                e.target.reset();
+                productList.innerHTML = '';
+                productCount = 0;
+                updateGrandTotal();
+                generateSalesID();
+                addProductItem();
+
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert(`Gagal menyimpan data: ${error.message}`);
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+        
+        function attachListeners() {
+            if (currentUserRole === 'admin') {
+                const salesQuery = query(collection(db, "sales"), orderBy("createdAt", "desc"));
+                salesUnsubscribe = onSnapshot(salesQuery, (querySnapshot) => {
+                    const sales = [];
+                    querySnapshot.forEach((doc) => {
+                        sales.push({ id: doc.id, ...doc.data() });
+                    });
+                    renderSalesTable(sales);
+                    updateDashboardStats(sales);
+                });
+
+                const usersQuery = query(collection(db, "users"));
+                usersUnsubscribe = onSnapshot(usersQuery, (querySnapshot) => {
+                    const users = [];
+                    querySnapshot.forEach((doc) => {
+                         users.push({ id: doc.id, ...doc.data() });
+                    });
+                    renderUsersTable(users);
+                });
+            }
+        }
+
+        function renderSalesTable(sales) {
+            const tableBody = document.getElementById('sales-table-body');
+            tableBody.innerHTML = '';
+            if (sales.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4">Belum ada data penjualan.</td></tr>`;
+                return;
+            }
+            sales.forEach(sale => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-900">${sale.idPenjualan}</td>
+                    <td class="px-6 py-4">${sale.namaPelanggan}</td>
+                    <td class="px-6 py-4">${new Date(sale.tanggalPembelian).toLocaleDateString('id-ID')}</td>
+                    <td class="px-6 py-4">${sale.namaSales}</td>
+                    <td class="px-6 py-4 font-semibold">${formatCurrency(sale.grandTotal)}</td>
+                    <td class="px-6 py-4 flex items-center space-x-2">
+                        <button class="view-btn text-blue-600 hover:underline" data-id="${sale.id}">Lihat</button>
+                        <button class="edit-btn text-yellow-600 hover:underline" data-id="${sale.id}">Edit</button>
+                        <button class="delete-btn text-red-600 hover:underline" data-id="${sale.id}">Hapus</button>
+                        <button class="invoice-btn text-teal-600 hover:underline" data-id="${sale.id}"><i class="fas fa-print"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function updateDashboardStats(sales) {
+            const totalPenjualan = sales.reduce((sum, sale) => sum + (sale.grandTotal || 0), 0);
+            const jumlahTransaksi = sales.length;
+            const produkTerjual = sales.reduce((sum, sale) => sum + sale.products.reduce((pSum, p) => pSum + (p.qty || 0), 0), 0);
+            const uniqueCustomers = new Set(sales.map(sale => sale.teleponPelanggan));
+            
+            document.getElementById('stat-total-penjualan').textContent = formatCurrency(totalPenjualan);
+            document.getElementById('stat-jumlah-transaksi').textContent = jumlahTransaksi;
+            document.getElementById('stat-produk-terjual').textContent = produkTerjual;
+            document.getElementById('stat-jumlah-pelanggan').textContent = uniqueCustomers.size;
+        }
+        
+        function renderUsersTable(users) {
+            const tableBody = document.getElementById('users-table-body');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b';
+                row.innerHTML = `
+                    <td class="px-6 py-4">${user.email}</td>
+                    <td class="px-6 py-4 text-xs font-mono">${user.id}</td>
+                    <td class="px-6 py-4 font-semibold uppercase">${user.role}</td>
+                    <td class="px-6 py-4">
+                        <select data-uid="${user.id}" class="role-selector p-2 border rounded ${user.id === auth.currentUser.uid ? 'bg-gray-200' : ''}" ${user.id === auth.currentUser.uid ? 'disabled' : ''}>
+                            <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        document.getElementById('users-table-body').addEventListener('change', async (e) => {
+            if (e.target.classList.contains('role-selector')) {
+                const uid = e.target.dataset.uid;
+                const newRole = e.target.value;
+                if (confirm(`Anda yakin ingin mengubah peran pengguna ini menjadi ${newRole}?`)) {
+                    const userDocRef = doc(db, "users", uid);
+                    try {
+                        await updateDoc(userDocRef, { role: newRole });
+                        alert('Peran pengguna berhasil diubah.');
+                    } catch (error) {
+                        alert(`Gagal mengubah peran: ${error.message}`);
+                    }
+                } else {
+                    const userDocRef = doc(db, "users", uid);
+                    const userDoc = await getDoc(userDocRef);
+                    e.target.value = userDoc.data().role;
+                }
+            }
+        });
+
+        // --- CRUD Actions from Dashboard ---
+        const modal = document.getElementById('sales-modal');
+        const modalContent = document.getElementById('modal-content');
+
+        document.getElementById('sales-table-body').addEventListener('click', async e => {
+            const target = e.target.closest('button');
+            if (!target) return;
+
+            const saleId = target.dataset.id;
+            
+            if (target.classList.contains('delete-btn')) {
+                if(confirm('Anda yakin ingin menghapus data penjualan ini? Tindakan ini tidak dapat diurungkan.')) {
+                    try {
+                        await deleteDoc(doc(db, "sales", saleId));
+                        alert('Data berhasil dihapus.');
+                    } catch (error) {
+                        alert(`Gagal menghapus data: ${error.message}`);
+                    }
+                }
+            }
+            
+            if (target.classList.contains('view-btn') || target.classList.contains('edit-btn')) {
+                const isEditMode = target.classList.contains('edit-btn');
+                const saleDoc = await getDoc(doc(db, "sales", saleId));
+                if (saleDoc.exists()) {
+                    currentOpenSaleId = saleId;
+                    displaySalesModal(saleDoc.data(), saleId, isEditMode);
+                }
+            }
+
+            if (target.classList.contains('invoice-btn')) {
+                 const saleDoc = await getDoc(doc(db, "sales", saleId));
+                 if (saleDoc.exists()) {
+                    printInvoice(saleDoc.data());
+                 }
+            }
+        });
+        
+        function displaySalesModal(data, id, isEditMode) {
+            let productsHtml = data.products.map(p => `
+                <tr class="border-b">
+                    <td class="p-2">${p.name}</td>
+                    <td class="p-2">${p.qty}</td>
+                    <td class="p-2">${formatCurrency(p.price)}</td>
+                    <td class="p-2">${formatCurrency(p.total)}</td>
+                </tr>
+            `).join('');
+
+            modalContent.innerHTML = `
+                <form id="edit-sales-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div><strong>ID Penjualan:</strong> <input type="text" name="idPenjualan" value="${data.idPenjualan}" class="w-full mt-1 p-2 bg-gray-200 border rounded" readonly></div>
+                        <div><strong>Nama Sales:</strong> <input type="text" name="namaSales" value="${data.namaSales}" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}></div>
+                        <div><strong>Pelanggan:</strong> <input type="text" name="namaPelanggan" value="${data.namaPelanggan}" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}></div>
+                        <div><strong>Telepon:</strong> <input type="text" name="teleponPelanggan" value="${data.teleponPelanggan}" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}></div>
+                        <div class="md:col-span-2"><strong>Alamat:</strong> <textarea name="alamatPelanggan" rows="2" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}>${data.alamatPelanggan}</textarea></div>
+                        <div><strong>Tgl Pembelian:</strong> <input type="date" name="tanggalPembelian" value="${data.tanggalPembelian}" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}></div>
+                        <div><strong>Tgl Pengiriman:</strong> <input type="date" name="tanggalPengiriman" value="${data.tanggalPengiriman}" class="w-full mt-1 p-2 border rounded" ${!isEditMode ? 'readonly' : ''}></div>
+                    </div>
+                    <h4 class="font-semibold mt-4 mb-2">Produk</h4>
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100"><tr><th class="p-2">Nama</th><th class="p-2">Qty</th><th class="p-2">Harga</th><th class="p-2">Total</th></tr></thead>
+                        <tbody>${productsHtml}</tbody>
+                    </table>
+                    <div class="text-right mt-2 font-bold text-lg">Total: ${formatCurrency(data.grandTotal)}</div>
+                    ${isEditMode ? `<div class="text-right mt-6"><button type="submit" data-id="${id}" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Simpan Perubahan</button></div>` : ''}
+                </form>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if(isEditMode) {
+                 document.getElementById('edit-sales-form').addEventListener('submit', handleUpdateSale);
+            }
+        }
+
+        async function handleUpdateSale(e) {
+            e.preventDefault();
+            const saleId = e.submitter.dataset.id;
+            const form = e.target;
+
+            const updatedData = {
+                namaSales: form.namaSales.value,
+                namaPelanggan: form.namaPelanggan.value,
+                teleponPelanggan: form.teleponPelanggan.value,
+                alamatPelanggan: form.alamatPelanggan.value,
+                tanggalPembelian: form.tanggalPembelian.value,
+                tanggalPengiriman: form.tanggalPengiriman.value,
+            };
+
+            loadingSpinner.classList.remove('hidden');
+            try {
+                await updateDoc(doc(db, "sales", saleId), updatedData);
+                alert('Data berhasil diperbarui!');
+                closeModal();
+            } catch (error) {
+                alert(`Gagal memperbarui: ${error.message}`);
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+        
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modalContent.innerHTML = '';
+            currentOpenSaleId = null;
+        }
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        document.getElementById('print-invoice-modal-btn').addEventListener('click', async () => {
+             if (currentOpenSaleId) {
+                 const saleDoc = await getDoc(doc(db, "sales", currentOpenSaleId));
+                 if (saleDoc.exists()) {
+                    printInvoice(saleDoc.data());
+                 }
+             }
+        });
+
+        // --- INVOICE PRINTING ---
+        function printInvoice(saleData) {
+            const productRows = saleData.products.map(p => `
+                <tr class="border-b">
+                    <td class="py-2 px-4">${p.name}</td>
+                    <td class="py-2 px-4 text-center">${p.qty}</td>
+                    <td class="py-2 px-4 text-right">${formatCurrency(p.price)}</td>
+                    <td class="py-2 px-4 text-right">${formatCurrency(p.total)}</td>
+                </tr>
+            `).join('');
+
+            const invoiceHtml = `
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="UTF-8">
+                <title>Invoice ${saleData.idPenjualan}</title>
+                <scr` + `ipt src="https://cdn.tailwindcss.com"></scr` + `ipt>
+            </head>
+            <body class="bg-white">
+                <div class="max-w-4xl mx-auto p-8 font-sans">
+                    <header class="flex justify-between items-center pb-6 border-b">
+                        <div>
+                            <h1 class="text-3xl font-bold text-blue-600">INVOICE</h1>
+                            <p class="text-gray-600">SalesApp Company</p>
+                            <p class="text-gray-500 text-sm">Jalan Teknologi No. 1, Jakarta</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-500">Invoice #${saleData.idPenjualan}</p>
+                            <p class="text-gray-500">Tanggal: ${new Date(saleData.tanggalPembelian).toLocaleDateString('id-ID')}</p>
+                        </div>
+                    </header>
+                    <section class="grid grid-cols-2 gap-8 my-8">
+                        <div>
+                            <h2 class="text-sm font-semibold text-gray-700 mb-2">Ditujukan Kepada:</h2>
+                            <p class="font-bold">${saleData.namaPelanggan}</p>
+                            <p>${saleData.alamatPelanggan}</p>
+                            <p>${saleData.teleponPelanggan}</p>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-sm font-semibold text-gray-700 mb-2">Sales:</h2>
+                            <p>${saleData.namaSales}</p>
+                        </div>
+                    </section>
+                    <main>
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-4 font-semibold text-gray-700">Produk</th>
+                                    <th class="py-2 px-4 font-semibold text-gray-700 text-center">Kuantitas</th>
+                                    <th class="py-2 px-4 font-semibold text-gray-700 text-right">Harga Satuan</th>
+                                    <th class="py-2 px-4 font-semibold text-gray-700 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${productRows}
+                            </tbody>
+                        </table>
+                    </main>
+                    <footer class="mt-8 pt-6 border-t flex justify-end">
+                        <div class="w-full max-w-xs">
+                            <div class="flex justify-between text-gray-700">
+                                <span>Subtotal</span>
+                                <span>${formatCurrency(saleData.grandTotal)}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-700 mt-2">
+                                <span>Pajak (0%)</span>
+                                <span>Rp 0</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-xl text-blue-600 mt-4 pt-4 border-t">
+                                <span>TOTAL</span>
+                                <span>${formatCurrency(saleData.grandTotal)}</span>
+                            </div>
+                        </div>
+                    </footer>
+                    <div class="text-center text-gray-500 text-sm mt-12">
+                        <p>Terima kasih atas kepercayaan Anda.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(invoiceHtml);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500); // Delay to allow CSS to load
+        }
+
+        // --- EXPORT FUNCTIONS ---
+        document.getElementById('export-excel-btn').addEventListener('click', async () => {
+            const salesQuery = query(collection(db, "sales"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(salesQuery);
+            const salesData = [];
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                data.products.forEach(p => {
+                    salesData.push({
+                        'ID Penjualan': data.idPenjualan,
+                        'Nama Pelanggan': data.namaPelanggan,
+                        'Alamat Pelanggan': data.alamatPelanggan,
+                        'Nomor Telepon': data.teleponPelanggan,
+                        'Tanggal Pembelian': data.tanggalPembelian,
+                        'Estimasi Pengiriman': data.tanggalPengiriman,
+                        'Nama Sales': data.namaSales,
+                        'Nama Produk': p.name,
+                        'Qty': p.qty,
+                        'Harga Produk': p.price,
+                        'Total Harga Produk': p.total
+                    });
+                });
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(salesData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Penjualan");
+            XLSX.writeFile(workbook, "DataPenjualan.xlsx");
+        });
+
+        document.getElementById('export-pdf-btn').addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const salesQuery = query(collection(db, "sales"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(salesQuery);
+            const salesData = [];
+            querySnapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                salesData.push([
+                    data.idPenjualan,
+                    data.namaPelanggan,
+                    new Date(data.tanggalPembelian).toLocaleDateString('id-ID'),
+                    data.namaSales,
+                    formatCurrency(data.grandTotal)
+                ]);
+            });
+
+            doc.autoTable({
+                head: [['ID Penjualan', 'Pelanggan', 'Tanggal', 'Sales', 'Total']],
+                body: salesData,
+                startY: 20,
+            });
+            doc.text("Laporan Data Penjualan", 14, 15);
+            doc.save('LaporanPenjualan.pdf');
+        });
+
+        // --- Initial Load ---
+        addProductItem();
+        
+    </script>
+
+    <!-- 
+    ==================================================================
+    PENTING: CLOUD FUNCTION UNTUK NOTIFIKASI EMAIL
+    ==================================================================
+    Kode di bawah ini BUKAN untuk dijalankan di browser.
+    Anda harus men-deploy ini ke Firebase Cloud Functions.
+    
+    Langkah-langkah:
+    1. Setup Firebase CLI di komputer Anda.
+    2. Jalankan `firebase init functions`.
+    3. Pilih project Firebase Anda.
+    4. Pilih JavaScript atau TypeScript.
+    5. Ganti file `index.js` (atau `index.ts`) di folder `functions` dengan kode di bawah ini.
+    6. Install dependency: `npm install nodemailer`
+    7. Konfigurasi email & password Anda di environment variables functions:
+       firebase functions:config:set gmail.email="EMAIL_PENGIRIM@gmail.com" gmail.password="APP_PASSWORD_GMAIL_ANDA"
+       CATATAN: Gunakan "App Password" dari akun Google Anda, bukan password biasa.
+    8. Deploy dengan `firebase deploy --only functions`.
+    
+    -------------------- KODE UNTUK functions/index.js --------------------
+    
+    const functions = require("firebase-functions");
+    const nodemailer = require("nodemailer");
+
+    const gmailEmail = functions.config().gmail.email;
+    const gmailPassword = functions.config().gmail.password;
+
+    const mailTransport = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: gmailEmail,
+            pass: gmailPassword,
+        },
+    });
+
+    exports.sendSaleNotification = functions.https.onCall(async (data, context) => {
+        const saleData = data.saleData;
+
+        const mailOptions = {
+            from: `"Sales App Notifier" <${gmailEmail}>`,
+            to: "umaroud88@gmail.com",
+            subject: `Penjualan Baru: ${saleData.idPenjualan}`,
+            html: `
+                <h1>Ada Penjualan Baru!</h1>
+                <p>Detail Penjualan:</p>
+                <ul>
+                    <li><strong>ID Penjualan:</strong> ${saleData.idPenjualan}</li>
+                    <li><strong>Nama Pelanggan:</strong> ${saleData.namaPelanggan}</li>
+                    <li><strong>Nama Sales:</strong> ${saleData.namaSales}</li>
+                    <li><strong>Total Pembelian:</strong> Rp ${saleData.grandTotal.toLocaleString('id-ID')}</li>
+                </ul>
+                <p>Silakan cek dasbor untuk detail lebih lengkap.</p>
+            `,
+        };
+
+        try {
+            await mailTransport.sendMail(mailOptions);
+            functions.logger.log("Notifikasi email terkirim untuk penjualan:", saleData.idPenjualan);
+            return { success: true };
+        } catch (error) {
+            functions.logger.error(
+                "Gagal mengirim email:",
+                error
+            );
+            throw new functions.https.HttpsError('internal', 'Gagal mengirim email notifikasi.', error);
+        }
+    });
+
+    -------------------- AKHIR DARI KODE CLOUD FUNCTION --------------------
+    -->
+
+</body>
+</html>
